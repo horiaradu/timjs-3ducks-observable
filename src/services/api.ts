@@ -7,6 +7,7 @@ class Api {
   static requestErrorHandler(error: Error) {
     const customError = `i've parsed the error: ${error.message}`;
     store.dispatch(showError(customError));
+    return null;
   }
 
   static getData() {
@@ -23,7 +24,7 @@ class Api {
   }
 
   getData() {
-    const promise = new Promise((resolve, reject) => setTimeout(() => resolve('i got the data'), 500));
+    const promise = new Promise<string>((resolve, reject) => setTimeout(() => resolve('i got the data'), 500));
     if (this.ignoreErrorHandling) {
       return promise;
     }
@@ -31,7 +32,7 @@ class Api {
   }
 
   failedCall() {
-    const promise = new Promise((resolve, reject) => setTimeout(() => reject(new Error('fail')), 500));
+    const promise = new Promise<string>((resolve, reject) => setTimeout(() => reject(new Error('fail')), 500));
     if (this.ignoreErrorHandling) {
       return promise;
     }

@@ -44,7 +44,6 @@ export const failWithCustomHandler = () => {
     try {
       const result = await new Api().setIgnoreErrorHandling(true).failedCall();
       dispatch({ type: types.SET_DATA, data: result });
-      return result;
     } catch (error) {
       console.log('I caught an error and now I am handling it very custom: ' + error.message);
     } finally {

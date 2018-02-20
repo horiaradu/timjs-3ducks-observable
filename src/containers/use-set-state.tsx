@@ -34,6 +34,7 @@ class UseSetState extends React.Component<Props, State> {
   }
 }
 
+// bindActionCreators is not typed :(
 const mapStateToProps = () => ({});
 const mapDispatchToProps = (dispatch: Dispatch<OwnProps>) => bindActionCreators({ fetchSomeData }, dispatch);
 
