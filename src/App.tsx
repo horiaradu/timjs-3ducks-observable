@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './App.css';
-// import Routes from './routes';
+import Routes from './routes';
 
 const logo = require('./logo.svg');
 
@@ -16,7 +16,9 @@ class App extends React.Component {
           To get started, edit <code>src/App.tsx</code> and save to reload.
         </p>
 
-        <div>{/* <Routes /> */}</div>
+        <div>
+          <Routes />
+        </div>
       </div>
     );
   }

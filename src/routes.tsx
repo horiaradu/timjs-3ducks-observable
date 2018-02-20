@@ -4,7 +4,7 @@ import UseSetState from './containers/use-set-state';
 
 const Routes = () => (
   <Switch>
-    <Route path="/with-set-state" component={UseSetState} exact={true} />
+    <Route path="/use-set-state" component={UseSetState} exact={true} />
   </Switch>
 );
 
