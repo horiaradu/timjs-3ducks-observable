@@ -1,6 +1,6 @@
 class Api {
   static getData() {
-    return Promise.resolve('i got the data');
+    return new Promise((resolve, reject) => setTimeout(() => resolve('i got the data'), 500));
   }
 }
 

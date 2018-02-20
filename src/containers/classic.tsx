@@ -2,39 +2,35 @@ import * as React from 'react';
 import { fetchSomeData } from '../actions';
 import { bindActionCreators, Dispatch } from 'redux';
 import { connect } from 'react-redux';
+import { RootState } from '../reducers';
 
 interface Props {
   fetchSomeData: () => Promise<string>;
-}
-
-interface State {
-  data: string | null;
+  data: string;
+  loading: boolean;
 }
 
 interface OwnProps {}
 
-class UseSetState extends React.Component<Props, State> {
-  state = {
-    data: null,
-  };
-
+class Classic extends React.Component<Props, {}> {
   componentDidMount() {
-    this.props.fetchSomeData().then(data => {
-      this.setState({ data });
-    });
+    this.props.fetchSomeData();
   }
 
   render() {
     return (
       <div>
-        <h1>Using setState</h1>
-        {this.state.data}
+        <h1>Classic approach</h1>
+        {this.props.loading ? 'loading...' : this.props.data}
       </div>
     );
   }
 }
 
-const mapStateToProps = () => ({});
+const mapStateToProps = (state: RootState) => ({
+  data: state.main.data,
+  loading: state.main.loading,
+});
 const mapDispatchToProps = (dispatch: Dispatch<OwnProps>) => bindActionCreators({ fetchSomeData }, dispatch);
 
-export default connect<{}, {}, {}>(mapStateToProps, mapDispatchToProps)(UseSetState);
+export default connect<{}, {}, {}>(mapStateToProps, mapDispatchToProps)(Classic);
