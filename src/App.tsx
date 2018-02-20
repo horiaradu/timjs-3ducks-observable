@@ -1,5 +1,6 @@
 import * as React from 'react';
 import './App.css';
+// import Routes from './routes';
 
 const logo = require('./logo.svg');
 
@@ -14,6 +15,8 @@ class App extends React.Component {
         <p className="App-intro">
           To get started, edit <code>src/App.tsx</code> and save to reload.
         </p>
+
+        <div>{/* <Routes /> */}</div>
       </div>
     );
   }
