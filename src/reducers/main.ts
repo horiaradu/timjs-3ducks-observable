@@ -1,5 +1,5 @@
 import * as types from '../actions/types';
-import { RootAction, SetData, ShowError } from '../actions';
+import { RootAction } from '../actions';
 
 export type MainState = {
   readonly data: string | null;
@@ -18,12 +18,13 @@ export default (state = initialState, action: RootAction): MainState => {
     case types.FETCH_END:
       return { ...state, loading: false };
     case types.SET_DATA:
-      const data = (action as SetData).data;
+      const data = action.data;
       return { ...state, data };
     case types.SHOW_ERROR:
-      console.log('a fancy component would display these things generically: ' + (action as ShowError).msg);
+      console.log('a fancy component would display these things generically: ' + action.msg);
       return state;
     default:
+      const _exhaustive: never = action;
       return state;
   }
 };

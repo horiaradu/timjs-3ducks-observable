@@ -1,19 +1,18 @@
 import * as React from 'react';
 import { fetchSomeData } from '../actions';
-import { bindActionCreators, Dispatch } from 'redux';
+import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
+import { RootState } from '../reducers';
 
-interface Props {
-  fetchSomeData: () => Promise<string>;
+interface DispatchProps {
+  fetchSomeData: () => Promise<string | null>;
 }
 
 interface State {
   data: string | null;
 }
 
-interface OwnProps {}
-
-class UseSetState extends React.Component<Props, State> {
+class UseSetState extends React.Component<DispatchProps, State> {
   state = {
     data: null,
   };
@@ -36,6 +35,8 @@ class UseSetState extends React.Component<Props, State> {
 
 // bindActionCreators is not typed :(
 const mapStateToProps = () => ({});
-const mapDispatchToProps = (dispatch: Dispatch<OwnProps>) => bindActionCreators({ fetchSomeData }, dispatch);
+const mapDispatchToProps = (dispatch: Dispatch<RootState>) => ({
+  fetchSomeData: () => dispatch(fetchSomeData()),
+});
 
-export default connect<{}, {}, {}>(mapStateToProps, mapDispatchToProps)(UseSetState);
+export default connect<{}, DispatchProps, {}>(mapStateToProps, mapDispatchToProps)(UseSetState);

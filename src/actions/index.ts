@@ -3,17 +3,12 @@ import * as types from './types';
 import { Dispatch } from 'redux';
 import { RootState } from '../reducers';
 
-export interface SetData {
-  type: string;
-  data: string;
-}
-
-export interface ShowError {
-  type: string;
-  msg: string;
-}
-
-export type RootAction = SetData | ShowError | { type: string };
+export type Action<T> = { type: T };
+export type SetData = Action<typeof types.SET_DATA> & { data: string };
+export type ShowError = Action<typeof types.SHOW_ERROR> & { msg: string };
+export type FetchStart = Action<typeof types.FETCH_START>;
+export type FetchEnd = Action<typeof types.FETCH_END>;
+export type RootAction = SetData | ShowError | FetchStart | FetchEnd;
 
 export const fetchSomeData = () => {
   return async (dispatch: Dispatch<RootState>) => {

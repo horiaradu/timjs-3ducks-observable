@@ -1,16 +1,18 @@
 import * as React from 'react';
 import { fetchSomeData } from '../actions';
-import { bindActionCreators, Dispatch } from 'redux';
+import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { RootState } from '../reducers';
 
-interface Props {
-  fetchSomeData: () => Promise<string>;
-  data: string;
+interface StateProps {
+  data: string | null;
   loading: boolean;
 }
+interface DispatchProps {
+  fetchSomeData: () => Promise<string | null>;
+}
 
-interface OwnProps {}
+type Props = DispatchProps & StateProps;
 
 class Classic extends React.Component<Props, {}> {
   componentDidMount() {
@@ -31,6 +33,8 @@ const mapStateToProps = (state: RootState) => ({
   data: state.main.data,
   loading: state.main.loading,
 });
-const mapDispatchToProps = (dispatch: Dispatch<OwnProps>) => bindActionCreators({ fetchSomeData }, dispatch);
+const mapDispatchToProps = (dispatch: Dispatch<RootState>) => ({
+  fetchSomeData: () => dispatch(fetchSomeData()),
+});
 
-export default connect<{}, {}, {}>(mapStateToProps, mapDispatchToProps)(Classic);
+export default connect<StateProps, DispatchProps, {}>(mapStateToProps, mapDispatchToProps)(Classic);

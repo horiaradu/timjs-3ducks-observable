@@ -6,7 +6,7 @@ export type RootState = {
   readonly main: MainState;
 };
 
-export default combineReducers({
+export default combineReducers<RootState>({
   routing: routerReducer,
   main,
 });

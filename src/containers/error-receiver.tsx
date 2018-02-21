@@ -1,17 +1,15 @@
 import * as React from 'react';
 import { failWithDefaultHandler, failWithCustomHandler } from '../actions';
-import { bindActionCreators, Dispatch } from 'redux';
+import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { RootState } from '../reducers';
 
-interface Props {
-  failWithDefaultHandler: () => Promise<string>;
-  failWithCustomHandler: () => Promise<string>;
+interface DispatchProps {
+  failWithDefaultHandler: () => Promise<string | null>;
+  failWithCustomHandler: () => Promise<void>;
 }
 
-interface OwnProps {}
-
-class ErrorReceiver extends React.Component<Props, {}> {
+class ErrorReceiver extends React.Component<DispatchProps, {}> {
   render() {
     return (
       <div>
@@ -24,7 +22,9 @@ class ErrorReceiver extends React.Component<Props, {}> {
 }
 
 const mapStateToProps = (state: RootState) => ({});
-const mapDispatchToProps = (dispatch: Dispatch<OwnProps>) =>
-  bindActionCreators({ failWithDefaultHandler, failWithCustomHandler }, dispatch);
+const mapDispatchToProps = (dispatch: Dispatch<RootState>) => ({
+  failWithDefaultHandler: () => dispatch(failWithDefaultHandler()),
+  failWithCustomHandler: () => dispatch(failWithCustomHandler()),
+});
 
-export default connect<{}, {}, {}>(mapStateToProps, mapDispatchToProps)(ErrorReceiver);
+export default connect<{}, DispatchProps, {}>(mapStateToProps, mapDispatchToProps)(ErrorReceiver);
