@@ -4,10 +4,12 @@ import { RootAction } from '../actions';
 export type MainState = {
   readonly data: string | null;
   readonly loading: boolean;
+  readonly results: string[];
 };
 
 const initialState = {
   data: null,
+  results: [],
   loading: false,
 };
 
@@ -23,8 +25,11 @@ export default (state = initialState, action: RootAction): MainState => {
     case types.SHOW_ERROR:
       console.log('a fancy component would display these things generically: ' + action.msg);
       return state;
+    case types.SET_SEARCH_RESULTS:
+      return { ...state, results: action.results };
     default:
       const _exhaustive: never = action;
+      console.log(_exhaustive);
       return state;
   }
 };

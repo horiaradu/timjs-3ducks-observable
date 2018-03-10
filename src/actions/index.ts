@@ -8,7 +8,8 @@ export type SetData = Action<typeof types.SET_DATA> & { data: string };
 export type ShowError = Action<typeof types.SHOW_ERROR> & { msg: string };
 export type FetchStart = Action<typeof types.FETCH_START>;
 export type FetchEnd = Action<typeof types.FETCH_END>;
-export type RootAction = SetData | ShowError | FetchStart | FetchEnd;
+export type SetSearchResults = Action<typeof types.SET_SEARCH_RESULTS> & { results: string[] };
+export type RootAction = SetData | ShowError | FetchStart | FetchEnd | SetSearchResults;
 
 export const fetchSomeData = () => {
   return async (dispatch: Dispatch<RootState>) => {
@@ -48,3 +49,10 @@ export const failWithCustomHandler = () => {
 };
 
 export const showError = (errorMessage: string) => ({ type: types.SHOW_ERROR, msg: errorMessage });
+
+export const search = (term: string) => {
+  return async (dispatch: Dispatch<RootState>) => {
+    const result = await Api.search(term);
+    dispatch({ type: types.SET_SEARCH_RESULTS, data: result });
+  };
+};

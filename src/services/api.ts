@@ -18,6 +18,10 @@ class Api {
     return new Api().failedCall();
   }
 
+  static search(term: string) {
+    return new Api().search(term);
+  }
+
   setIgnoreErrorHandling(value: boolean) {
     this.ignoreErrorHandling = value;
     return this;
@@ -25,6 +29,21 @@ class Api {
 
   getData() {
     const promise = new Promise<string>((resolve, reject) => setTimeout(() => resolve('i got the data'), 500));
+    if (this.ignoreErrorHandling) {
+      return promise;
+    }
+    return promise.catch(Api.requestErrorHandler);
+  }
+
+  search(term: string) {
+    const word = () =>
+      [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()]
+        .map(x => String.fromCharCode(x))
+        .join('');
+
+    const promise = new Promise<string[]>((resolve, reject) =>
+      setTimeout(() => resolve([word(), word(), word(), word()]), 500),
+    );
     if (this.ignoreErrorHandling) {
       return promise;
     }
