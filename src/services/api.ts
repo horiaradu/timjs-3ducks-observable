@@ -37,12 +37,16 @@ class Api {
 
   search(term: string) {
     const word = () =>
+      term +
+      ' - ' +
       [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()]
+        .map(x => ('z'.charCodeAt(0) - 'A'.charCodeAt(0)) * x + 'A'.charCodeAt(0))
         .map(x => String.fromCharCode(x))
         .join('');
 
+    const randomDelay = 500 + Math.random() * 1000;
     const promise = new Promise<string[]>((resolve, reject) =>
-      setTimeout(() => resolve([word(), word(), word(), word()]), 500),
+      setTimeout(() => resolve([word(), word(), word(), word()]), randomDelay),
     );
     if (this.ignoreErrorHandling) {
       return promise;

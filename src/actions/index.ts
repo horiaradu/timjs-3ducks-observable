@@ -50,9 +50,18 @@ export const failWithCustomHandler = () => {
 
 export const showError = (errorMessage: string) => ({ type: types.SHOW_ERROR, msg: errorMessage });
 
+let lastRequestStartTimestamp = Date.now();
 export const search = (term: string) => {
+  const currentRequestStartTimestamp = Date.now();
+  lastRequestStartTimestamp = currentRequestStartTimestamp;
+
   return async (dispatch: Dispatch<RootState>) => {
-    const result = await Api.search(term);
-    dispatch({ type: types.SET_SEARCH_RESULTS, data: result });
+    const results = await Api.search(term);
+
+    if (currentRequestStartTimestamp < lastRequestStartTimestamp) {
+      console.warn('ignoring response, a newer request has been already sent');
+      return;
+    }
+    dispatch({ type: types.SET_SEARCH_RESULTS, results });
   };
 };

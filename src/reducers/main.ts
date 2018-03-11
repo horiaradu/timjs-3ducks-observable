@@ -28,8 +28,7 @@ export default (state = initialState, action: RootAction): MainState => {
     case types.SET_SEARCH_RESULTS:
       return { ...state, results: action.results };
     default:
-      const _exhaustive: never = action;
-      console.log(_exhaustive);
+      // const _exhaustive: never = action;
       return state;
   }
 };
