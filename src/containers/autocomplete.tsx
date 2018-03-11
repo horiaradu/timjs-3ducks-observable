@@ -1,26 +1,23 @@
 import * as React from 'react';
-import { search } from '../actions';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { RootState } from '../reducers';
 import { ChangeEvent } from 'react';
-import { debounce } from 'underscore';
+import { search, Search } from '../actions/types';
 
 interface StateProps {
   results: string[];
 }
 interface DispatchProps {
-  search: (term: string) => Promise<void>;
+  search: (term: string) => Search;
 }
 
 type Props = DispatchProps & StateProps;
 
 class Classic extends React.Component<Props, {}> {
-  performSearch = debounce((term: string) => this.props.search(term), 300);
-
   onInputChnage = (e: ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
-    this.performSearch(term);
+    this.props.search(term);
   };
 
   render() {

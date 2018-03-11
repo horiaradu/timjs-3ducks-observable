@@ -1,12 +1,17 @@
 import * as React from 'react';
-import { failWithDefaultHandler, failWithCustomHandler } from '../actions';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { RootState } from '../reducers';
+import {
+  failWithDefaultHandler,
+  FailWithDefaultHandler,
+  failWithCustomHandler,
+  FailWithCustomHandler,
+} from '../actions/types';
 
 interface DispatchProps {
-  failWithDefaultHandler: () => Promise<string | null>;
-  failWithCustomHandler: () => Promise<void>;
+  failWithDefaultHandler: () => FailWithDefaultHandler;
+  failWithCustomHandler: () => FailWithCustomHandler;
 }
 
 class ErrorReceiver extends React.Component<DispatchProps, {}> {

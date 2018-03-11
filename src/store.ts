@@ -1,15 +1,16 @@
 import { createStore, applyMiddleware, compose, GenericStoreEnhancer } from 'redux';
 import { routerMiddleware } from 'react-router-redux';
-import thunk from 'redux-thunk';
+import { createEpicMiddleware } from 'redux-observable';
 import createHistory from 'history/createBrowserHistory';
 
 import rootReducer from './reducers';
+import rootEpic from './actions/index';
 
 export const history = createHistory();
 
 const initialState = {};
 const enhancers = [];
-const middleware = [thunk, routerMiddleware(history)];
+const middleware = [routerMiddleware(history), createEpicMiddleware(rootEpic)];
 
 declare var window: { devToolsExtension: () => GenericStoreEnhancer };
 

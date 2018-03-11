@@ -1,13 +1,12 @@
-import store from '../store';
-import { showError } from '../actions';
+import { fromPromise } from 'rxjs/observable/fromPromise';
+import { of } from 'rxjs/observable/of';
+import { showError, ShowError } from '../actions/types';
+import { Observable } from 'rxjs/Observable';
 
 class Api {
-  ignoreErrorHandling = false;
-
-  static requestErrorHandler(error: Error) {
+  static requestErrorHandler(error: Error): Observable<ShowError> {
     const customError = `i've parsed the error: ${error.message}`;
-    store.dispatch(showError(customError));
-    return null;
+    return of(showError(customError));
   }
 
   static getData() {
@@ -22,17 +21,9 @@ class Api {
     return new Api().search(term);
   }
 
-  setIgnoreErrorHandling(value: boolean) {
-    this.ignoreErrorHandling = value;
-    return this;
-  }
-
   getData() {
     const promise = new Promise<string>((resolve, reject) => setTimeout(() => resolve('i got the data'), 500));
-    if (this.ignoreErrorHandling) {
-      return promise;
-    }
-    return promise.catch(Api.requestErrorHandler);
+    return fromPromise(promise);
   }
 
   search(term: string) {
@@ -48,18 +39,12 @@ class Api {
     const promise = new Promise<string[]>((resolve, reject) =>
       setTimeout(() => resolve([word(), word(), word(), word()]), randomDelay),
     );
-    if (this.ignoreErrorHandling) {
-      return promise;
-    }
-    return promise.catch(Api.requestErrorHandler);
+    return fromPromise(promise);
   }
 
   failedCall() {
     const promise = new Promise<string>((resolve, reject) => setTimeout(() => reject(new Error('fail')), 500));
-    if (this.ignoreErrorHandling) {
-      return promise;
-    }
-    return promise.catch(Api.requestErrorHandler);
+    return fromPromise(promise);
   }
 }
 
