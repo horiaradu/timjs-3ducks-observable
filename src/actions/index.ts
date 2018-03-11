@@ -27,7 +27,7 @@ import {
 import { RootState } from '../reducers';
 import { Store } from 'react-redux';
 
-const fetchSomeData = (action$: ActionsObservable<RootAction>, store: Store<RootState>): Observable<RootAction> =>
+const fetchSomeData = (action$: ActionsObservable<RootAction>): Observable<RootAction> =>
   action$
     .ofType<FetchData>(types.FETCH_DATA)
     .pipe(
@@ -43,10 +43,7 @@ const fetchSomeData = (action$: ActionsObservable<RootAction>, store: Store<Root
       ),
     );
 
-const failWithDefaultHandler = (
-  action$: ActionsObservable<RootAction>,
-  store: Store<RootState>,
-): Observable<RootAction> =>
+const failWithDefaultHandler = (action$: ActionsObservable<RootAction>): Observable<RootAction> =>
   action$
     .ofType<FailWithDefaultHandler>(types.FAIL_WITH_DEFAULT_HANDLER)
     .pipe(
@@ -62,10 +59,7 @@ const failWithDefaultHandler = (
       ),
     );
 
-const failWithCustomHandler = (
-  action$: ActionsObservable<RootAction>,
-  store: Store<RootState>,
-): Observable<RootAction> =>
+const failWithCustomHandler = (action$: ActionsObservable<RootAction>): Observable<RootAction> =>
   action$.ofType<FailWithCustomHandler>(types.FAIL_WITH_CUSTOM_HANDLER).pipe(
     switchMap(() =>
       merge(
@@ -82,7 +76,7 @@ const failWithCustomHandler = (
     ),
   );
 
-const search = (action$: ActionsObservable<RootAction>, store: Store<RootState>): Observable<RootAction> =>
+const search = (action$: ActionsObservable<RootAction>): Observable<RootAction> =>
   action$
     .ofType<Search>(types.SEARCH)
     .pipe(
