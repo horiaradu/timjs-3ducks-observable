@@ -1,25 +1,19 @@
-import store from '../store';
 import { showError } from '../actions';
+import { Dispatch } from 'react-redux';
+import { RootAction } from '../actions/types';
 
-class Api {
+export default class Api {
   ignoreErrorHandling = false;
+  dispatch: Dispatch<RootAction>;
 
-  static requestErrorHandler(error: Error) {
+  constructor(dispatch: Dispatch<RootAction>) {
+    this.dispatch = dispatch;
+  }
+
+  static requestErrorHandler(dispatch: Dispatch<RootAction>, error: Error) {
     const customError = `i've parsed the error: ${error.message}`;
-    store.dispatch(showError(customError));
+    dispatch(showError(customError));
     return null;
-  }
-
-  static getData() {
-    return new Api().getData();
-  }
-
-  static failedCall() {
-    return new Api().failedCall();
-  }
-
-  static search(term: string) {
-    return new Api().search(term);
   }
 
   setIgnoreErrorHandling(value: boolean) {
@@ -32,7 +26,7 @@ class Api {
     if (this.ignoreErrorHandling) {
       return promise;
     }
-    return promise.catch(Api.requestErrorHandler);
+    return promise.catch(e => Api.requestErrorHandler(this.dispatch, e));
   }
 
   search(term: string) {
@@ -51,7 +45,7 @@ class Api {
     if (this.ignoreErrorHandling) {
       return promise;
     }
-    return promise.catch(Api.requestErrorHandler);
+    return promise.catch(e => Api.requestErrorHandler(this.dispatch, e));
   }
 
   failedCall() {
@@ -59,8 +53,6 @@ class Api {
     if (this.ignoreErrorHandling) {
       return promise;
     }
-    return promise.catch(Api.requestErrorHandler);
+    return promise.catch(e => Api.requestErrorHandler(this.dispatch, e));
   }
 }
-
-export default Api;

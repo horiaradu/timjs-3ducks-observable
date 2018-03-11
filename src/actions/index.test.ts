@@ -22,7 +22,8 @@ describe('project actions', () => {
     const res = await store.dispatch(actions.failWithDefaultHandler());
     expect(res).toEqual(null);
     const dispatched = store.getActions();
-    expect(dispatched.length).toEqual(3);
-    expect(dispatched[1]).toEqual({ type: types.SET_DATA, data: res });
+    expect(dispatched.length).toEqual(4);
+    expect(dispatched[1]).toEqual({ type: types.SHOW_ERROR, msg: "i've parsed the error: fail" });
+    expect(dispatched[2]).toEqual({ type: types.SET_DATA, data: res });
   });
 });
