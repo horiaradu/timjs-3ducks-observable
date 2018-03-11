@@ -5,12 +5,13 @@ import createHistory from 'history/createBrowserHistory';
 
 import rootReducer from './reducers';
 import rootEpic from './actions/index';
+import api from './services/api';
 
 export const history = createHistory();
 
 const initialState = {};
 const enhancers = [];
-const middleware = [routerMiddleware(history), createEpicMiddleware(rootEpic)];
+const middleware = [routerMiddleware(history), createEpicMiddleware(rootEpic, { dependencies: { api } })];
 
 declare var window: { devToolsExtension: () => GenericStoreEnhancer };
 

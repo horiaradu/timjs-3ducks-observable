@@ -1,4 +1,4 @@
-import Api from '../services/api';
+import { Api } from '../services/api';
 import * as types from './types';
 
 import { of } from 'rxjs/observable/of';
@@ -27,44 +27,60 @@ import {
 import { RootState } from '../reducers';
 import { Store } from 'react-redux';
 
-const fetchSomeData = (action$: ActionsObservable<RootAction>): Observable<RootAction> =>
+const fetchSomeData = (
+  action$: ActionsObservable<RootAction>,
+  store: Store<RootState>,
+  { api }: { api: Api },
+): Observable<RootAction> =>
   action$
     .ofType<FetchData>(types.FETCH_DATA)
     .pipe(
       switchMap(() =>
         merge(
           of(fetchStart()),
-          Api.getData().pipe(
-            map(result => setData(result)),
-            catchError(error => Api.requestErrorHandler(error)),
-            concat(of(fetchEnd())),
-          ),
+          api
+            .getData()
+            .pipe(
+              map(result => setData(result)),
+              catchError(error => api.requestErrorHandler(error)),
+              concat(of(fetchEnd())),
+            ),
         ),
       ),
     );
 
-const failWithDefaultHandler = (action$: ActionsObservable<RootAction>): Observable<RootAction> =>
+const failWithDefaultHandler = (
+  action$: ActionsObservable<RootAction>,
+  store: Store<RootState>,
+  { api }: { api: Api },
+): Observable<RootAction> =>
   action$
     .ofType<FailWithDefaultHandler>(types.FAIL_WITH_DEFAULT_HANDLER)
     .pipe(
       switchMap(() =>
         merge(
           of(fetchStart()),
-          Api.failedCall().pipe(
-            map(result => setData(result)),
-            catchError(error => Api.requestErrorHandler(error)),
-            concat(of(fetchEnd())),
-          ),
+          api
+            .failedCall()
+            .pipe(
+              map(result => setData(result)),
+              catchError(error => api.requestErrorHandler(error)),
+              concat(of(fetchEnd())),
+            ),
         ),
       ),
     );
 
-const failWithCustomHandler = (action$: ActionsObservable<RootAction>): Observable<RootAction> =>
+const failWithCustomHandler = (
+  action$: ActionsObservable<RootAction>,
+  store: Store<RootState>,
+  { api }: { api: Api },
+): Observable<RootAction> =>
   action$.ofType<FailWithCustomHandler>(types.FAIL_WITH_CUSTOM_HANDLER).pipe(
     switchMap(() =>
       merge(
         of(fetchStart()),
-        Api.failedCall().pipe(
+        api.failedCall().pipe(
           map(result => setData(result)),
           concat(of(fetchEnd())),
           catchError((error: Error) => {
@@ -76,13 +92,17 @@ const failWithCustomHandler = (action$: ActionsObservable<RootAction>): Observab
     ),
   );
 
-const search = (action$: ActionsObservable<RootAction>): Observable<RootAction> =>
+const search = (
+  action$: ActionsObservable<RootAction>,
+  store: Store<RootState>,
+  { api }: { api: Api },
+): Observable<RootAction> =>
   action$
     .ofType<Search>(types.SEARCH)
     .pipe(
       distinctUntilChanged(),
       debounceTime(300),
-      switchMap(({ term }) => Api.search(term).pipe(map((results: string[]) => setSearchResults(results)))),
+      switchMap(({ term }) => api.search(term).pipe(map((results: string[]) => setSearchResults(results)))),
     );
 
 export default combineEpics(fetchSomeData, failWithDefaultHandler, failWithCustomHandler, search);

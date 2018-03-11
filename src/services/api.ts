@@ -3,29 +3,22 @@ import { of } from 'rxjs/observable/of';
 import { showError, ShowError } from '../actions/types';
 import { Observable } from 'rxjs/Observable';
 
-class Api {
-  static requestErrorHandler(error: Error): Observable<ShowError> {
+export interface Api {
+  requestErrorHandler(error: Error): Observable<ShowError>;
+  getData(): Observable<string>;
+  failedCall(): Observable<string>;
+  search(term: string): Observable<string[]>;
+}
+
+export default {
+  requestErrorHandler(error: Error) {
     const customError = `i've parsed the error: ${error.message}`;
     return of(showError(customError));
-  }
-
-  static getData() {
-    return new Api().getData();
-  }
-
-  static failedCall() {
-    return new Api().failedCall();
-  }
-
-  static search(term: string) {
-    return new Api().search(term);
-  }
-
+  },
   getData() {
     const promise = new Promise<string>((resolve, reject) => setTimeout(() => resolve('i got the data'), 500));
     return fromPromise(promise);
-  }
-
+  },
   search(term: string) {
     const word = () =>
       term +
@@ -40,12 +33,9 @@ class Api {
       setTimeout(() => resolve([word(), word(), word(), word()]), randomDelay),
     );
     return fromPromise(promise);
-  }
-
+  },
   failedCall() {
     const promise = new Promise<string>((resolve, reject) => setTimeout(() => reject(new Error('fail')), 500));
     return fromPromise(promise);
-  }
-}
-
-export default Api;
+  },
+};
