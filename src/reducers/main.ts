@@ -1,5 +1,5 @@
 import * as types from '../actions/types';
-import { RootAction } from '../actions';
+import { RootAction } from '../actions/types';
 
 export type MainState = {
   readonly data: string | null;
