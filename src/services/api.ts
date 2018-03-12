@@ -1,14 +1,21 @@
 import { fromPromise } from 'rxjs/observable/fromPromise';
 import { of } from 'rxjs/observable/of';
-import { showError, ShowError } from '../actions/types';
+import { showError, ShowError, receiveMessage, ReceiveMessage } from '../actions/types';
 import { Observable } from 'rxjs/Observable';
+import { fromEvent } from 'rxjs/observable/fromEvent';
+import { map } from 'rxjs/operators/map';
+import * as io from 'socket.io-client';
 
 export interface Api {
   requestErrorHandler(error: Error): Observable<ShowError>;
   getData(): Observable<string>;
   failedCall(): Observable<string>;
   search(term: string): Observable<string[]>;
+  subscribe(): Observable<ReceiveMessage>;
+  sendMessage(msg: string): void;
 }
+
+let socket: SocketIOClient.Socket;
 
 export default {
   requestErrorHandler(error: Error) {
@@ -37,5 +44,16 @@ export default {
   failedCall() {
     const promise = new Promise<string>((resolve, reject) => setTimeout(() => reject(new Error('fail')), 500));
     return fromPromise(promise);
+  },
+  subscribe() {
+    console.log('connecting....');
+    if (!socket) {
+      socket = io('http://localhost:8000');
+    }
+    return fromEvent(socket, 'receive message').pipe(map((msg: string) => receiveMessage(msg)));
+  },
+  sendMessage(msg: string) {
+    console.log('sending ', msg);
+    socket.emit('send message', msg);
   },
 };

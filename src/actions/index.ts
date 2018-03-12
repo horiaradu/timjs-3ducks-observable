@@ -8,6 +8,7 @@ import { map } from 'rxjs/operators/map';
 import { merge } from 'rxjs/observable/merge';
 import { distinctUntilChanged } from 'rxjs/operators/distinctUntilChanged';
 import { debounceTime } from 'rxjs/operators/debounceTime';
+import { takeUntil } from 'rxjs/operators/takeUntil';
 import { catchError } from 'rxjs/operators/catchError';
 
 import { ActionsObservable } from 'redux-observable';
@@ -23,6 +24,9 @@ import {
   FailWithCustomHandler,
   Search,
   setSearchResults,
+  ConnectToSocket,
+  SendMessage,
+  DisconnectFromSocket,
 } from './types';
 import { RootState } from '../reducers';
 import { Store } from 'react-redux';
@@ -105,4 +109,35 @@ const search = (
       switchMap(({ term }) => api.search(term).pipe(map((results: string[]) => setSearchResults(results)))),
     );
 
-export default combineEpics(fetchSomeData, failWithDefaultHandler, failWithCustomHandler, search);
+const connectToSocket = (
+  action$: ActionsObservable<RootAction>,
+  store: Store<RootState>,
+  { api }: { api: Api },
+): Observable<RootAction> =>
+  action$
+    .ofType<ConnectToSocket>(types.CONNECT_TO_SOCKET)
+    .pipe(
+      switchMap(() => api.subscribe()),
+      takeUntil(action$.ofType<DisconnectFromSocket>(types.DISCONNECT_FROM_SOCKET)),
+    );
+
+const sendMessage = (
+  action$: ActionsObservable<RootAction>,
+  store: Store<RootState>,
+  { api }: { api: Api },
+): Observable<RootAction> =>
+  action$.ofType<SendMessage>(types.SEND_MESSAGE).pipe(
+    switchMap(({ msg }) => {
+      api.sendMessage(msg);
+      return merge(of(fetchStart()), of(fetchEnd()));
+    }),
+  );
+
+export default combineEpics(
+  fetchSomeData,
+  failWithDefaultHandler,
+  failWithCustomHandler,
+  search,
+  connectToSocket,
+  sendMessage,
+);

@@ -14,6 +14,11 @@ export type FetchEnd = Action<typeof FETCH_END>;
 
 export type Search = Action<typeof SEARCH> & { term: string };
 export type SetSearchResults = Action<typeof SET_SEARCH_RESULTS> & { results: string[] };
+
+export type ConnectToSocket = Action<typeof CONNECT_TO_SOCKET>;
+export type DisconnectFromSocket = Action<typeof DISCONNECT_FROM_SOCKET>;
+export type ReceiveMessage = Action<typeof RECEIVE_MESSAGE> & { msg: string };
+export type SendMessage = Action<typeof SEND_MESSAGE> & { msg: string };
 export type RootAction =
   | FetchData
   | SetData
@@ -23,7 +28,11 @@ export type RootAction =
   | FetchStart
   | FetchEnd
   | Search
-  | SetSearchResults;
+  | SetSearchResults
+  | ConnectToSocket
+  | DisconnectFromSocket
+  | ReceiveMessage
+  | SendMessage;
 
 export const FETCH_DATA = 'FETCH_DATA';
 export const SET_DATA = 'SET_DATA';
@@ -34,6 +43,10 @@ export const FETCH_END = 'FETCH_END';
 export const SHOW_ERROR = 'SHOW_ERROR';
 export const SEARCH = 'SEARCH';
 export const SET_SEARCH_RESULTS = 'SET_SEARCH_RESULTS';
+export const CONNECT_TO_SOCKET = 'CONNECT_TO_SOCKET';
+export const DISCONNECT_FROM_SOCKET = 'DISCONNECT_FROM_SOCKET';
+export const RECEIVE_MESSAGE = 'RECEIVE_MESSAGE';
+export const SEND_MESSAGE = 'SEND_MESSAGE';
 
 export const fetchData = createAction(FETCH_DATA);
 export const setData = createAction(SET_DATA, (data: string) => ({ type: SET_DATA, data }));
@@ -47,3 +60,7 @@ export const setSearchResults = createAction(SET_SEARCH_RESULTS, (results: strin
   type: SET_SEARCH_RESULTS,
   results,
 }));
+export const connectToSocket = createAction(CONNECT_TO_SOCKET);
+export const disconnectFromSocket = createAction(DISCONNECT_FROM_SOCKET);
+export const receiveMessage = createAction(RECEIVE_MESSAGE, (msg: string) => ({ type: RECEIVE_MESSAGE, msg }));
+export const sendMessage = createAction(SEND_MESSAGE, (msg: string) => ({ type: SEND_MESSAGE, msg }));
