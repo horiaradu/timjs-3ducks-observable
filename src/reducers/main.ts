@@ -5,12 +5,14 @@ export type MainState = {
   readonly data: string | null;
   readonly loading: boolean;
   readonly results: string[];
+  readonly messages: string[];
 };
 
 const initialState = {
   data: null,
   results: [],
   loading: false,
+  messages: [],
 };
 
 export default (state = initialState, action: RootAction): MainState => {
@@ -27,6 +29,8 @@ export default (state = initialState, action: RootAction): MainState => {
       return state;
     case types.SET_SEARCH_RESULTS:
       return { ...state, results: action.results };
+    case types.RECEIVE_MESSAGE:
+      return { ...state, messages: [...state.messages, action.msg] };
     default:
       // const _exhaustive: never = action;
       return state;

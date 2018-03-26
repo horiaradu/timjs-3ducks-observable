@@ -1,40 +1,31 @@
-import store from '../store';
-import { showError } from '../actions';
+import { fromPromise } from 'rxjs/observable/fromPromise';
+import { of } from 'rxjs/observable/of';
+import { showError, ShowError, receiveMessage, ReceiveMessage } from '../actions/types';
+import { Observable } from 'rxjs/Observable';
+import { fromEvent } from 'rxjs/observable/fromEvent';
+import { map } from 'rxjs/operators/map';
+import * as io from 'socket.io-client';
 
-class Api {
-  ignoreErrorHandling = false;
+export interface Api {
+  requestErrorHandler(error: Error): Observable<ShowError>;
+  getData(): Observable<string>;
+  failedCall(): Observable<string>;
+  search(term: string): Observable<string[]>;
+  subscribe(): Observable<ReceiveMessage>;
+  sendMessage(msg: string): void;
+}
 
-  static requestErrorHandler(error: Error) {
+let socket: SocketIOClient.Socket;
+
+export default {
+  requestErrorHandler(error: Error) {
     const customError = `i've parsed the error: ${error.message}`;
-    store.dispatch(showError(customError));
-    return null;
-  }
-
-  static getData() {
-    return new Api().getData();
-  }
-
-  static failedCall() {
-    return new Api().failedCall();
-  }
-
-  static search(term: string) {
-    return new Api().search(term);
-  }
-
-  setIgnoreErrorHandling(value: boolean) {
-    this.ignoreErrorHandling = value;
-    return this;
-  }
-
+    return of(showError(customError));
+  },
   getData() {
     const promise = new Promise<string>((resolve, reject) => setTimeout(() => resolve('i got the data'), 500));
-    if (this.ignoreErrorHandling) {
-      return promise;
-    }
-    return promise.catch(Api.requestErrorHandler);
-  }
-
+    return fromPromise(promise);
+  },
   search(term: string) {
     const word = () =>
       term +
@@ -48,19 +39,21 @@ class Api {
     const promise = new Promise<string[]>((resolve, reject) =>
       setTimeout(() => resolve([word(), word(), word(), word()]), randomDelay),
     );
-    if (this.ignoreErrorHandling) {
-      return promise;
-    }
-    return promise.catch(Api.requestErrorHandler);
-  }
-
+    return fromPromise(promise);
+  },
   failedCall() {
     const promise = new Promise<string>((resolve, reject) => setTimeout(() => reject(new Error('fail')), 500));
-    if (this.ignoreErrorHandling) {
-      return promise;
+    return fromPromise(promise);
+  },
+  subscribe() {
+    console.log('connecting....');
+    if (!socket) {
+      socket = io('http://localhost:8000');
     }
-    return promise.catch(Api.requestErrorHandler);
-  }
-}
-
-export default Api;
+    return fromEvent(socket, 'receive message').pipe(map((msg: string) => receiveMessage(msg)));
+  },
+  sendMessage(msg: string) {
+    console.log('sending ', msg);
+    socket.emit('send message', msg);
+  },
+};

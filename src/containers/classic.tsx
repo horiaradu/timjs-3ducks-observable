@@ -1,15 +1,15 @@
 import * as React from 'react';
-import { fetchSomeData } from '../actions';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { RootState } from '../reducers';
+import { fetchData, FetchData } from '../actions/types';
 
 interface StateProps {
   data: string | null;
   loading: boolean;
 }
 interface DispatchProps {
-  fetchSomeData: () => Promise<string | null>;
+  fetchSomeData: () => FetchData;
 }
 
 type Props = DispatchProps & StateProps;
@@ -34,7 +34,7 @@ const mapStateToProps = (state: RootState) => ({
   loading: state.main.loading,
 });
 const mapDispatchToProps = (dispatch: Dispatch<RootState>) => ({
-  fetchSomeData: () => dispatch(fetchSomeData()),
+  fetchSomeData: () => dispatch(fetchData()),
 });
 
 export default connect<StateProps, DispatchProps, {}>(mapStateToProps, mapDispatchToProps)(Classic);

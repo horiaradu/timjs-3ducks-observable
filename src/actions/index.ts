@@ -1,59 +1,143 @@
-import Api from '../services/api';
+import { Api } from '../services/api';
 import * as types from './types';
-import { Dispatch } from 'redux';
+
+import { of } from 'rxjs/observable/of';
+import { concat } from 'rxjs/operators/concat';
+import { switchMap } from 'rxjs/operators/switchMap';
+import { map } from 'rxjs/operators/map';
+import { merge } from 'rxjs/observable/merge';
+import { distinctUntilChanged } from 'rxjs/operators/distinctUntilChanged';
+import { debounceTime } from 'rxjs/operators/debounceTime';
+import { takeUntil } from 'rxjs/operators/takeUntil';
+import { catchError } from 'rxjs/operators/catchError';
+
+import { ActionsObservable } from 'redux-observable';
+import { combineEpics } from 'redux-observable';
+import { Observable } from 'rxjs/Observable';
+import {
+  setData,
+  fetchStart,
+  fetchEnd,
+  RootAction,
+  FetchData,
+  FailWithDefaultHandler,
+  FailWithCustomHandler,
+  Search,
+  setSearchResults,
+  ConnectToSocket,
+  SendMessage,
+  DisconnectFromSocket,
+} from './types';
 import { RootState } from '../reducers';
+import { Store } from 'react-redux';
 
-export const fetchSomeData = () => {
-  return async (dispatch: Dispatch<RootState>) => {
-    dispatch({ type: types.FETCH_START });
-    const result = await Api.getData();
-    dispatch({ type: types.SET_DATA, data: result });
-    dispatch({ type: types.FETCH_END });
-    return result;
-  };
-};
+const fetchSomeData = (
+  action$: ActionsObservable<RootAction>,
+  store: Store<RootState>,
+  { api }: { api: Api },
+): Observable<RootAction> =>
+  action$
+    .ofType<FetchData>(types.FETCH_DATA)
+    .pipe(
+      switchMap(() =>
+        merge(
+          of(fetchStart()),
+          api
+            .getData()
+            .pipe(
+              map(result => setData(result)),
+              catchError(error => api.requestErrorHandler(error)),
+              concat(of(fetchEnd())),
+            ),
+        ),
+      ),
+    );
 
-export const failWithDefaultHandler = () => {
-  return async (dispatch: Dispatch<RootState>) => {
-    dispatch({ type: types.FETCH_START });
-    try {
-      const result = await Api.failedCall();
-      dispatch({ type: types.SET_DATA, data: result });
-      return result;
-    } finally {
-      dispatch({ type: types.FETCH_END });
-    }
-  };
-};
+const failWithDefaultHandler = (
+  action$: ActionsObservable<RootAction>,
+  store: Store<RootState>,
+  { api }: { api: Api },
+): Observable<RootAction> =>
+  action$
+    .ofType<FailWithDefaultHandler>(types.FAIL_WITH_DEFAULT_HANDLER)
+    .pipe(
+      switchMap(() =>
+        merge(
+          of(fetchStart()),
+          api
+            .failedCall()
+            .pipe(
+              map(result => setData(result)),
+              catchError(error => api.requestErrorHandler(error)),
+              concat(of(fetchEnd())),
+            ),
+        ),
+      ),
+    );
 
-export const failWithCustomHandler = () => {
-  return async (dispatch: Dispatch<RootState>) => {
-    dispatch({ type: types.FETCH_START });
-    try {
-      const result = await new Api().setIgnoreErrorHandling(true).failedCall();
-      dispatch({ type: types.SET_DATA, data: result });
-    } catch (error) {
-      console.log('I caught an error and now I am handling it very custom: ' + error.message);
-    } finally {
-      dispatch({ type: types.FETCH_END });
-    }
-  };
-};
+const failWithCustomHandler = (
+  action$: ActionsObservable<RootAction>,
+  store: Store<RootState>,
+  { api }: { api: Api },
+): Observable<RootAction> =>
+  action$.ofType<FailWithCustomHandler>(types.FAIL_WITH_CUSTOM_HANDLER).pipe(
+    switchMap(() =>
+      merge(
+        of(fetchStart()),
+        api.failedCall().pipe(
+          map(result => setData(result)),
+          concat(of(fetchEnd())),
+          catchError((error: Error) => {
+            console.log('I caught an error and now I am handling it very custom');
+            return of(fetchEnd());
+          }),
+        ),
+      ),
+    ),
+  );
 
-export const showError = (errorMessage: string) => ({ type: types.SHOW_ERROR, msg: errorMessage });
+const search = (
+  action$: ActionsObservable<RootAction>,
+  store: Store<RootState>,
+  { api }: { api: Api },
+): Observable<RootAction> =>
+  action$
+    .ofType<Search>(types.SEARCH)
+    .pipe(
+      distinctUntilChanged(),
+      debounceTime(300),
+      switchMap(({ term }) => api.search(term).pipe(map((results: string[]) => setSearchResults(results)))),
+    );
 
-let lastRequestStartTimestamp = Date.now();
-export const search = (term: string) => {
-  const currentRequestStartTimestamp = Date.now();
-  lastRequestStartTimestamp = currentRequestStartTimestamp;
+const connectToSocket = (
+  action$: ActionsObservable<RootAction>,
+  store: Store<RootState>,
+  { api }: { api: Api },
+): Observable<RootAction> =>
+  action$
+    .ofType<ConnectToSocket>(types.CONNECT_TO_SOCKET)
+    .pipe(
+      switchMap(() => api.subscribe()),
+      takeUntil(action$.ofType<DisconnectFromSocket>(types.DISCONNECT_FROM_SOCKET)),
+    );
 
-  return async (dispatch: Dispatch<RootState>) => {
-    const results = await Api.search(term);
+const sendMessage = (
+  action$: ActionsObservable<RootAction>,
+  store: Store<RootState>,
+  { api }: { api: Api },
+): Observable<RootAction> =>
+  action$.ofType<SendMessage>(types.SEND_MESSAGE).pipe(
+    switchMap(({ msg }) => {
+      api.sendMessage(msg);
+      return merge(of(fetchStart()), of(fetchEnd()));
+    }),
+  );
 
-    if (currentRequestStartTimestamp < lastRequestStartTimestamp) {
-      console.warn('ignoring response, a newer request has been already sent');
-      return;
-    }
-    dispatch({ type: types.SET_SEARCH_RESULTS, results });
-  };
-};
+export default combineEpics(
+  fetchSomeData,
+  failWithDefaultHandler,
+  failWithCustomHandler,
+  search,
+  connectToSocket,
+  sendMessage,
+);
